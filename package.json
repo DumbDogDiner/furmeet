@@ -1,0 +1,24 @@
+{
+	"name": "furmeet",
+	"version": "1.0.0",
+	"main": "index.js",
+	"license": "MIT",
+	"scripts": {
+		"start": "ts-node-dev --respawn src"
+	},
+	"devDependencies": {
+		"@types/node": "^14.14.28",
+		"@typescript-eslint/eslint-plugin": "^4.15.1",
+		"@typescript-eslint/parser": "^4.15.1",
+		"eslint": "^7.20.0",
+		"ts-node": "^9.1.1",
+		"ts-node-dev": "^1.1.1",
+		"typescript": "^4.1.5"
+	},
+	"dependencies": {
+		"@discordjs/opus": "^0.4.0",
+		"dotenv": "^8.2.0",
+		"vixie": "https://github.com/skyezerfox/vixie.git",
+		"winston": "^3.3.3"
+	}
+}
