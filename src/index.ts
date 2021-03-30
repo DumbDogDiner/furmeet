@@ -1,9 +1,7 @@
 import { config } from "dotenv";
 
-import { Bind } from "./commands/Bind";
+import { Ping } from "./commands/Ping";
 import { Record } from "./commands/Record";
-import { Stop } from "./commands/Stop";
-import { Unbind } from "./commands/Unbind";
 import { Furmeet } from "./Furmeet";
 import { VcStateListener } from "./listeners/VcStateListener";
 
@@ -12,7 +10,19 @@ config();
 
 const client: Furmeet = new Furmeet()
 	.on("ready", () => client.logger.info("Connected to Discord."))
-	.registerListener(VcStateListener)
-	.registerCommand(Bind, Unbind, Record, Stop);
+	.registerCommand(Ping, Record)
+	.registerListener(VcStateListener);
 
+// log into discord.
 client.login(process.env.ACCESS_TOKEN!);
+
+// add sigint handler
+process.on("SIGINT", async () => {
+	client.logger.info("Gracefully closing active recording sessions...");
+	// kill all active voice sessions before exiting.
+	await client.rtxManager.destroyAll();
+	// remove event listeners before destroying to prevent things from breaking.
+	client.removeAllListeners();
+	// destroy the client.
+	client.destroy();
+});

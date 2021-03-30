@@ -1,17 +1,20 @@
-import { ApplyPrecondition, Command, Context } from "vixie";
+import { Command, Context } from "vixie";
 
 import { Furmeet } from "../Furmeet";
 
-/**
- * Joins the bot to the current user channel.
- */
-@ApplyPrecondition((ctx) => ctx.author.id == "210118905006522369")
 export class Stop extends Command {
 	constructor(readonly client: Furmeet) {
-		super(client, { name: "stop", aliases: [] });
+		super(client, { name: "stop", aliases: ["s"] });
 	}
 
-	async run(ctx: Context, ...args: string[]) {
-		this.client.voiceStream.destroy();
+	async run(ctx: Context) {
+		// if there isn't a voice session for the target guild, error.
+		if (this.client.rtxManager.has(ctx.guild)) {
+			return ctx.reply(
+				"Cannot destroy session - there is no session to destroy!"
+			);
+		}
+		// destroy the session.
+		this.client.rtxManager.destroy(ctx.guild);
 	}
 }
