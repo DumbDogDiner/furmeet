@@ -70,7 +70,7 @@ export class Mixer extends Readable {
 	}
 
 	/**
-	 * Clears all of the input's buffers
+	 * Clears all of the input's buffers.
 	 */
 	protected clearBuffers() {
 		// zero all input buffers

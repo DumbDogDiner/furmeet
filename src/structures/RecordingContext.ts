@@ -1,5 +1,10 @@
-import { Guild, Message, VoiceChannel } from "discord.js";
+import { Collection, GuildMember, VoiceChannel } from "discord.js";
+import { createWriteStream } from "fs";
+import { resolve } from "path";
 import { Context, Result } from "vixie";
+
+import { Input } from "../audio/Input";
+import { Mixer } from "../audio/Mixer";
 
 /**
  * Represents a recording context.
@@ -12,6 +17,16 @@ export class RecordingContext extends Context {
 	get guild() {
 		return this.message.guild!;
 	}
+
+	get voice() {
+		return this.guild.voice!;
+	}
+
+	get connection() {
+		return this.voice.connection!;
+	}
+
+	protected inputs = new Collection<GuildMember, Input>();
 
 	/**
 	 * Initialize the recording context.
@@ -31,13 +46,30 @@ export class RecordingContext extends Context {
 				new Error("Cannot create session - failed to join your voice channel!")
 			);
 		}
+
+		const mixer = new Mixer();
+		// create readables for people in the vc.
+		this.vc.members
+			.filter((v) => v.id != this.guild.client.user!.id)
+			.forEach((v) => {
+				const input = mixer.fromReadable(
+					this.connection.receiver.createStream(v, {
+						mode: "pcm",
+						end: "manual",
+					})
+				);
+				this.inputs.set(v, input);
+			});
+		// create the output write stream.
+		createWriteStream(resolve(process.cwd(), "out/output.raw"));
 		// inform the user their session has started.
 		await this.reply("Successfully connected! Recording has begun...");
+
 		return Result.ok(this);
 	}
 
 	async destroy() {
 		// leave the vc.
-		await this.vc.leave();
+		this.vc.leave();
 	}
 }
